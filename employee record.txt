@@ -1,0 +1,251 @@
+package Adsproject;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
+public class javaMIniproject {
+ static Connection con;
+     static Statement stm;
+     
+    static Scanner sc=new Scanner(System.in);
+    static void getConnection() throws Exception{
+     try {
+    Class.forName("com.mysql.cj.jdbc.Driver");
+     con=DriverManager.getConnection("jdbc:mysql://sql12.freemysqlhosting.net:3306/sql12331350","sql12331350","nDytwNvrRp");
+   stm=con.createStatement();
+     }	
+     catch(Exception e)
+     {
+     System.out.println("Cant establish connection!!!!!");
+     }
+     } 
+static void addrecord() throws Exception{
+
+System.out.println("ENTER EMPLOYEE'S ID: ");
+int empno=sc.nextInt();
+System.out.println("ENTER EMPLOYEE'S FIRST NAME:");
+String fname=sc.next();
+System.out.println("ENTER EMPLOYEE'S LAST NAME:");
+String lname=sc.next();
+System.out.println("ENTER DATE OF BIRTH(YYYY-MM-DD):");
+String dob=sc.next();
+System.out.println("ENTER JOIN DATE:");
+String join=sc.next();
+System.out.println("ENTER Department:");
+String dept=sc.next();
+System.out.println("ENTER DESIGNATION:");
+String desg=sc.next();
+System.out.println("ENTER BASIC SALARY:");
+int sal=sc.nextInt();
+System.out.println("ENTER EDUCATIONAL QUALIFICATION:");
+String qualification=sc.next();
+System.out.println("ENTER 1st LINE OF ADDRESS:");
+String add1=sc.next();
+   System.out.println("ENTER CITY:");
+   String city=sc.next();
+   
+   System.out.println("ENTER PIN");
+   int pin=sc.nextInt();
+   
+   System.out.println("ENTER PHONE NUMBER:");
+   int phone=sc.nextInt();
+   
+String sql="insert into Employee_table values('"+empno+"','"+fname+"','"+lname+"','"+join+"','"+desg+"','"+dept+"','"+sal+"');";
+String sql2="insert into Employee_Personal_Info values('"+empno+"','"+dob+"','"+qualification+"','"+add1+"','"+city+"','"+pin+"','"+phone+"');";
+     stm.execute(sql);
+     stm.execute(sql2);
+   System.out.println("record added!!!");
+    
+}
+static void displayall() throws Exception{
+PreparedStatement ps2=con.prepareStatement("select * from Employee_table");
+ResultSet rst=ps2.executeQuery();
+System.out.println("Employee table:");
+System.out.println("Empno       FULLNAME          DATE OF BIRTH       DESIGNATION        DEPARTMENT      NETSALARY");
+while(rst.next())
+{
+int sal=Integer.parseInt(rst.getString(7));
+int HRA=(sal*20)/100;
+int DA=(sal*40)/100;
+int it=((HRA+DA+sal)*10)/100;
+int netsal=sal+HRA+DA+it;
+System.out.println(rst.getString(1)+"     "+rst.getString(2)+"     "+rst.getString(3)+"    "+rst.getString(4)+"    "+rst.getString(5)+"               "+rst.getString(6)+"           "+netsal);
+ 
+}
+}
+static void modifyrecord() throws Exception{
+System.out.println("ENTER EMPLOYEE ID TO MODIFY RECORDS:");
+String id=sc.next();
+PreparedStatement ps2=con.prepareStatement("select * from Employee_table");
+int flag=0;
+ResultSet rst=ps2.executeQuery();
+System.out.println("Record of employee id"+id+"\n");
+while(rst.next())
+{
+String emp=rst.getString(1);
+if(id.equals(emp))
+{
+System.out.println("DATA OF EMPLOYEE NUMBER "+emp+" IS:");
+System.out.println(rst.getString(1)+" "+rst.getString(2)+" "+rst.getString(3)+" "+rst.getString(4)+" "+rst.getString(5)+" "+rst.getString(6)+" "+rst.getString(7));
+System.out.println("\n\n");
+System.out.println("SELECT Coloumn TO MODIFY");
+System.out.println("DESGINATION     1");
+System.out.println("DEPARTMENT      2");
+System.out.println("BASIC SALARY     3");
+System.out.println("\n\n");
+System.out.println("ENTER YOUR CHOICE:");
+int choice=sc.nextInt();
+switch(choice)
+{
+case 1:
+System.out.println("ENTER VALUE TO MODIFY:");
+String des=sc.next();
+String sql="update Employee_table set designation='"+des+"' where Empno="+id+";";
+stm.execute(sql);
+System.out.println("RECORD MODIFIED SUCCESSFULLY!!!!!");
+flag=1;
+break;
+case 2: 
+System.out.println("ENTER VALUE TO MODIFY:");
+String dep=sc.next();
+String sql1="update Employee_table set dept='"+dep+"' where Empno="+id+";";
+stm.execute(sql1);
+System.out.println("RECORD MODIFIED SUCCESSFULLY!!!!!");
+flag=1;
+break;
+case 3:
+System.out.println("ENTER VALUE TO MODIFY:");
+int salary=sc.nextInt();
+String sql2="update Employee_table set salary='"+salary+"' where Empno="+id+";";
+stm.execute(sql2);
+System.out.println("RECORD MODIFIED SUCCESSFULLY!!!!!");
+flag=1;
+break;
+default:
+System.out.println("ENTER VALID CHOICE!!1");
+}
+if(flag==0)
+{
+ System.out.println("COULDNT MODIDY RECORD!!!!!!");
+}
+}
+}
+}
+static void deleterecord() throws Exception{
+try {
+System.out.println("ENTER EMPLOYEE NUMBER TO DELETE RECORD:");
+String empno=sc.next();
+int check=0;
+PreparedStatement ps2=con.prepareStatement("select * from Employee_table");
+ResultSet rst=ps2.executeQuery();
+ while(rst.next())
+{
+String emp=rst.getString(1);
+if(empno.equals(emp))
+{
+System.out.println("DO YOU WANT TO DELETE THE RECORD OF EMPLYEE WHOSE EMPLOYEE ID IS: "+empno+" THE ENTER Y/y:");
+String c=sc.next();
+if(c.toUpperCase().equals("Y"))
+{
+String sql="delete from Employee_table where Empno="+empno+";";
+String sql1="delete from Employee_Personal_Info where Empno="+empno+";";
+stm.execute(sql);
+stm.execute(sql1);
+System.out.println("RECORD IS DELETED!!!!");
+check=1;
+break;
+}
+}
+}
+ if(check==0)
+ {
+ System.out.println("couldnt find employee id "+empno+"......");
+ }
+}
+catch(Exception e)
+{
+System.out.println("COULDNT DELETE RECORD!!!!!");
+}
+}
+static void displayonerecord() throws Exception{
+System.out.println("ENTER EMPLOYEE NUMBER TO DISPLAY RECORD:");
+String empno=sc.next();
+PreparedStatement ps2=con.prepareStatement("select * from Employee_table");
+ResultSet rst=ps2.executeQuery();
+ 
+ while(rst.next())
+{
+String emp=rst.getString(1);
+if(empno.equals(emp))
+{
+System.out.println("EMPLOYEE NO:"+rst.getString(1)+"\nEMPLOYEE NAME: "+rst.getString(2)+" "+rst.getString(3)+"\nJOIN DATE: "+rst.getString(4)+"\nDESGINATION: "+rst.getString(5)+"\nDEPARTMENT: "+rst.getString(6)+"\nSALARY:"+rst.getString(7));
+}
+}
+ PreparedStatement ps3=con.prepareStatement("select * from Employee_Personal_Info");
+ ResultSet rstm=ps3.executeQuery();
+while(rstm.next())
+{
+String id=rstm.getString(1);
+if(id.equals(empno))
+{
+System.out.println("DATE OF BIRTH:"+rstm.getString(2)+"\nEDUCATIONAL QUALIFICATION:"+rstm.getString(3)+"\nADDRESS:"+rstm.getString(4)+"\nCITY"+rstm.getString(5)+"\nPIN:"+rstm.getString(6)+"\nPHONE:"+rstm.getString(7));
+}
+}
+           
+}
+public static void main(String[] args) throws Exception
+{
+getConnection();
+System.out.println("\t\t\t\t\t***************************************************");
+System.out.println("\t\t\t\t\t*****************WELCOME***************************");
+System.out.println("\t\t\t\t\t***************************************************");
+     System.out.println("\n\n\n\n");
+     System.out.println("\t\t\t\tMAIN MENU");
+     System.out.println("ADD RECORD\t\t\t\t\t\t[1]");
+     System.out.println("MODIFY RECORD\t\t\t\t\t\t[2]");
+     System.out.println("DELETE RECORD\t\t\t\t\t\t[3]");
+     System.out.println("DISPLAY ONE RECORD\t\t\t\t\t[4]");
+     System.out.println("DISPLAY ALL RECORD\t\t\t\t\t[5]");
+     System.out.println("Exit\t\t\t\t\t\t\t[6]");
+   
+    while(true){
+     System.out.println("ENTER YOUR CHOICE:");
+    int choice=sc.nextInt();
+    System.out.println("\n\n");
+switch(choice)
+{
+case 1:
+addrecord();
+System.out.println("\n\n\n");
+break;
+case 2:
+modifyrecord();
+       System.out.println("\n\n\n");
+break;
+case 3:
+{
+deleterecord();
+System.out.println("\n\n\n");
+      break;
+}
+case 4:
+displayonerecord();
+break;
+case 5:
+displayall();
+break;
+case 6:
+System.out.println("\n\n\n");
+System.out.println("Process terminated...........");
+Thread.sleep(100);
+System.out.println("************PROGRAM EXITED!!!!!!!!!*****************\n\t\tTHANKYOU FOR USING THIS APPLICATION");
+System.exit(0);
+ }
+}
+}
+
+}
+
+
